@@ -4,9 +4,87 @@ params.zip = 'zip'
 
 process SAYHELLO {
     debug true
+
+    output:
+        stdout
+
+    script:
+    """
+    echo "HELLO WORLD!"
+    """
 }
 
+process SAYHELLO_PYTHON {
+    debug true
 
+    output:
+        stdout
+
+    script:
+    """
+    #!/usr/bin/env python
+    print("HELLO WORLD!")
+    """
+}
+
+process SAYHELLO_PARAM {
+    debug true
+    
+    input:
+        val greeting
+
+    output:
+        stdout
+
+    script:
+        """
+        echo "$greeting"
+        """
+}
+
+process SAYHELLO_FILE {
+    input:
+        val greeting
+
+    output:
+        path "greeting.txt"
+
+    script:
+    """
+    echo $greeting > greeting.txt
+    """
+}
+
+process UPPERCASE {
+    publishDir "/workspaces/computational-workflows-2025/notebooks/day_04"
+
+    input:
+        val greeting
+
+    output:
+        path "GREETING.txt"
+
+    script:
+    """
+    echo $greeting | tr "[a-z]" "[A-Z]" > GREETING.txt
+    """
+}
+
+process PRINTUPPER {
+    debug true
+
+    input:
+        path file
+
+    output:
+        stdout
+
+    script:
+    """
+    
+    """
+
+}
 
 workflow {
 

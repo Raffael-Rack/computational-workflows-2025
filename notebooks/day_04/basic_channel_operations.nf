@@ -7,6 +7,7 @@ workflow{
 
     if (params.step == 1) {
         in_ch = channel.of(1,2,3)
+        out_ch = in_ch.first().view()
 
     }
 
@@ -15,6 +16,7 @@ workflow{
     if (params.step == 2) {
 
         in_ch = channel.of(1,2,3)
+        out_ch = in_ch.last().view()
 
     }
 
@@ -23,6 +25,7 @@ workflow{
     if (params.step == 3) {
 
         in_ch = channel.of(1,2,3)
+        out_ch = in_ch.take(2).view()
 
 
     }
@@ -32,6 +35,7 @@ workflow{
     if (params.step == 4) {
 
         in_ch = channel.of(2,3,4)
+        out_ch = in_ch.map{v->v*v}.view()
 
 
     }
@@ -41,7 +45,8 @@ workflow{
     if (params.step == 5) {
 
         in_ch = channel.of(2,3,4)
-        in_ch.map { it -> it * it }.take(2).view()
+        in_ch.map { it -> it * it }
+        out_ch = in_ch.take(2).view()
         
     }
 
@@ -50,6 +55,7 @@ workflow{
     if (params.step == 6) {
         
         in_ch = channel.of('Taylor', 'Swift')
+        out_ch = in_ch.map {it -> it.reverse()}.view()
 
     }
 
@@ -58,7 +64,7 @@ workflow{
     if (params.step == 7) {
 
         in_ch = channel.fromPath('files_dir/*.fq')
-
+        out_ch = in_ch.map {it -> [it.toString().substring(68,it.toString().length()-3), it]}.view()
         
     }
 
@@ -68,7 +74,7 @@ workflow{
 
         ch_1 = channel.of(1,2,3)
         ch_2 = channel.of(4,5,6)
-        out_ch = channel.of("a", "b", "c")
+        out_ch = ch_1.concat(ch_2).view()
 
 
     }
@@ -78,6 +84,7 @@ workflow{
     if (params.step == 9) {
 
         in_ch = channel.of([1,2,3], [4,5,6])
+        out_ch = in_ch.flatten().view()
 
 
     }
@@ -87,6 +94,7 @@ workflow{
     if (params.step == 10) {
 
         in_ch = channel.of(1,2,3)
+        out_ch = in_ch.toList().view()
 
     }
     
@@ -100,6 +108,7 @@ workflow{
     if (params.step == 11) {
 
         in_ch = channel.of([1, 'V'], [3, 'M'], [2, 'O'], [1, 'f'], [3, 'G'], [1, 'B'], [2, 'L'], [2, 'E'], [3, '33'])
+        out_ch = in_ch.groupTuple().view()
 
     }
 
@@ -110,6 +119,8 @@ workflow{
         left_ch = channel.of([1, 'V'], [3, 'M'], [2, 'O'], [1, 'B'], [3, '33'])
         right_ch = channel.of([1, 'f'], [3, 'G'], [2, 'L'], [2, 'E'],)
 
+        out_ch = right_ch.join(left_ch).view()
+
     }
 
     // Task 13 - Split the input channel into two channels, one of all the even numbers and the other of all the odd numbers. Write the output of each channel to a list
@@ -118,6 +129,8 @@ workflow{
     if (params.step == 13) {
 
         in_ch = channel.of(1,2,3,4,5,6,7,8,9,10)
+        out_ch_1 = in_ch.filter{v -> v%2 == 1}.toList().map{v -> println "Odd:  "+v}
+        out_ch_2 = in_ch.filter{v -> v%2 == 0}.toList().map{v -> println "Even: "+v}
 
     }
 
@@ -135,6 +148,7 @@ workflow{
             ['name': 'Hagrid', 'title': 'groundkeeper'],
             ['name': 'Dobby', 'title': 'hero'],
         )
+        out_ch = in_ch.map{v -> v.name}.collectFile(name: "names.txt", newLine: true, storeDir: "/workspaces/computational-workflows-2025/notebooks/day_04/results").view()
     
     }
 
