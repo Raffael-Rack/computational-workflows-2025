@@ -81,8 +81,62 @@ process PRINTUPPER {
 
     script:
     """
-    
+    cat $file | xargs echo
     """
+
+}
+
+process ZIPPER {
+    debug true
+
+    input:
+        path file
+
+    output:
+        path "*.zip"
+
+    script:
+    """
+    zip ${file}.zip ${file}
+    """
+}
+
+process ZIPPER_ALL {
+    debug true
+
+    input:
+        path file
+
+    output:
+        tuple (path "*.zip"), (path "*.gz"), (path "*.bz2")
+
+    script:
+        """
+        zip ${file}.zip ${file}
+        gzip -c ${file} > ${file}.gz
+        bzip2 -c ${file} > ${file}.bz2
+        """
+}
+
+process TASK_9 {
+    publishDir "/workspaces/computational-workflows-2025/notebooks/day_04/results", mode: "copy"
+
+    input:
+        val data
+
+    output: 
+        path "names.tsv"
+
+    script:
+        def output_file = new File("names.tsv") 
+        //output_file.createNewFile()
+        def names = data["name"]
+        def titles = data["title"]
+        
+        """
+        echo $names > $output_file
+        echo $titles >> $output_file
+        """
 
 }
 
@@ -129,12 +183,17 @@ workflow {
     //          Print out the path to the zipped file in the console
     if (params.step == 7) {
         greeting_ch = Channel.of("Hello world!")
+        uppercase_ch = UPPERCASE(greeting_ch)
+        out_ch = ZIPPER(uppercase_ch)
+        out_ch.view()
     }
 
     // Task 8 - Create a process that zips the file created in the UPPERCASE process in "zip", "gzip" AND "bzip2" format. Print out the paths to the zipped files in the console
 
     if (params.step == 8) {
         greeting_ch = Channel.of("Hello world!")
+        uppercase_ch = UPPERCASE(greeting_ch)
+        out_ch = ZIPPER_ALL(uppercase_ch).flatten().view()
     }
 
     // Task 9 - Create a process that reads in a list of names and titles from a channel and writes them to a file.
@@ -151,9 +210,7 @@ workflow {
             ['name': 'Dobby', 'title': 'hero'],
         )
 
-        in_ch
-            | WRITETOFILE
-            // continue here
+        out_ch = TASK_9(in_ch.collect()).view()
     }
 
 }
